@@ -1,4 +1,5 @@
-import View from './View.js'
+import View from './View.js';
+import Clock from './Clock.js';
 
 function createInitialState(rows, cols){
   let state = new Array(rows);
@@ -35,6 +36,8 @@ function checkNeighboorhood(cell){
       if (rowOffset === 0 && colOffset === 0){
         continue;
       }
+
+      //check neighbor
       if (gameState[row + rowOffset][col + colOffset] === 1){
         liveNeighbors++;
       } else {
@@ -60,6 +63,7 @@ function run(){
       let curCel = gameState[row][col];
       const neighborhood = checkNeighboorhood({row, col});
 
+      //apply rules
       if (curCel === 1 && neighborhood.live < 2){
         newGameState[row][col] = 0;
       }
@@ -84,22 +88,26 @@ let state = 'stopped';
 const canvas = document.getElementById('canvas');
 const gameView = new View(canvas);
 
-//let gameState = [
-//   [0, 0, 0, 0, 0],
-//   [0, 0, 0, 0, 0],
-//   [0, 0, 1, 0, 0],
-//   [0, 0, 0, 0, 0],
-//   [0, 0, 0, 0, 0]
-// ]
-let gameState = createInitialState(20,20);
-gameView.drawGrid(20,20, gameState);
+let gameState = [
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 1, 1, 0, 0, 0, 0, 0],
+  [1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 1, 0, 0, 0, 1, 0, 0, 0, 0],
+  [0, 0, 0, 0, 1, 0, 1, 0, 0, 0],
+  [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+]
+// let gameState = createInitialState(10,10);
+gameView.drawGrid(gameState);
 
 gameView.onMouseMove(event => {
   gameView.highlightCell(event.cell);
 })
 
 gameView.onMouseClick(event => {
-  console.log(`You clicked on cell ${event.cell.row}, ${event.cell.col}`);
   const cell = event.cell;
 
   let selected = true;
@@ -112,19 +120,25 @@ gameView.onMouseClick(event => {
   gameView.setCellSelected(event.cell, selected);
 });
 
-const playButton = document.getElementById('playbutton');
-playButton.addEventListener('click', () => {
+const gameClock = new Clock();
+document.getElementById('playbutton').addEventListener('click', () => {
   if (state === 'playing'){
-    gameView.stopClock();
-    state = 'stopped';
+    gameClock.pause();
+    state = 'paused';
   } else {
     state = 'playing';
-    gameView.startClock();
+    gameClock.resume();
     run();
   }
 });
 
-const stepButton = document.getElementById('stepbutton');
-stepButton.addEventListener('click', () => {
+document.getElementById('stopbutton').addEventListener('click', () => {
+  gameClock.stop();
+  state = 'stopped';
+})
+
+document.getElementById('stepbutton').addEventListener('click', () => {
+  gameClock.resume();
   run();
+  gameClock.pause();
 })

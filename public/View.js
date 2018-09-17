@@ -13,15 +13,13 @@ export default class View{
     this._bufferCtx = this._bufferCanvas.getContext('2d');
   }
 
-  drawGrid(rows, cols, initialState){
+  drawGrid(initialState){
     if (!initialState){
       throw new Error('initialState is mandatory');
     }
 
-    this._validateInitialState(rows, cols, initialState);
-
-    this._rows = rows;
-    this._cols = cols;
+    this._rows = initialState.length;
+    this._cols = initialState[0].length;
     this._rowHeight = this._canvas.height / this._rows;
     this._colWidth = this._canvas.width / this._cols;
 
@@ -32,16 +30,6 @@ export default class View{
     this.saveState();
 
     this.redraw();
-  }
-
-  _validateInitialState(rows, cols, initialState){
-    if (!Array.isArray(initialState) || !Array.isArray(initialState[0])){
-      throw new Error('initialState expected to be a matrix!');
-    }
-
-    if (rows !== initialState.length || cols !== initialState[0].length){
-      throw new Error('initialState dimensions do not match provided "rows" and "cols" parameters');
-    }
   }
 
   setState(stateMatrix){
@@ -77,9 +65,7 @@ export default class View{
 
   _fillCell(cell, color){
     const startX = cell.col * this._colWidth;
-    const endX = startX + this._colWidth;
     const startY = cell.row * this._rowHeight;
-    const endY = startY + this._rowHeight;
 
     this._ctx.fillStyle = color;
     this._ctx.fillRect(startX, startY, this._colWidth, this._rowHeight);
@@ -123,34 +109,5 @@ export default class View{
       row: Math.floor(row), 
       col: Math.floor(col)
     };
-  }
-
-  startClock(){
-    const clock = document.getElementById("clock"); 
-    const startTime = new Date();
-
-    const playButton = document.getElementById("playbutton");
-    playButton.innerText = 'Stop';
-  
-    this._continueUpdatingClock = true;
-    this._gameStartedAt = new Date();
-    this._updateClock();
-  }
-
-  _updateClock(){
-    const secondsElapsed = new Date() - this._gameStartedAt;
-    clock.textContent = secondsElapsed + 'ms';
-    clock.style.fontWeight = 'bold';
-
-    if (this._continueUpdatingClock){
-      requestAnimationFrame(this._updateClock.bind(this));
-    }
-  }
-
-  stopClock(){
-    const playButton = document.getElementById("playbutton");
-    playButton.innerText = 'Play';
-
-    this._continueUpdatingClock = false;
   }
 }
