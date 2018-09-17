@@ -1,0 +1,16 @@
+body {
+  display: grid;
+}
+
+.toolbar{
+  width: 800px;
+  display: flex;
+  justify-content: space-between;
+  height: 40px;
+  font-size: 24px;
+}
+
+.play-button{
+  width: 200px;
+  height: 30px;
+}

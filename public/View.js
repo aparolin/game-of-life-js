@@ -124,4 +124,33 @@ export default class View{
       col: Math.floor(col)
     };
   }
+
+  startClock(){
+    const clock = document.getElementById("clock"); 
+    const startTime = new Date();
+
+    const playButton = document.getElementById("playbutton");
+    playButton.innerText = 'Stop';
+  
+    this._continueUpdatingClock = true;
+    this._gameStartedAt = new Date();
+    this._updateClock();
+  }
+
+  _updateClock(){
+    const secondsElapsed = new Date() - this._gameStartedAt;
+    clock.textContent = secondsElapsed + 'ms';
+    clock.style.fontWeight = 'bold';
+
+    if (this._continueUpdatingClock){
+      requestAnimationFrame(this._updateClock.bind(this));
+    }
+  }
+
+  stopClock(){
+    const playButton = document.getElementById("playbutton");
+    playButton.innerText = 'Play';
+
+    this._continueUpdatingClock = false;
+  }
 }
