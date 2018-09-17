@@ -99,13 +99,13 @@ let gameState = [
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-]
+];
 // let gameState = createInitialState(10,10);
 gameView.drawGrid(gameState);
 
 gameView.onMouseMove(event => {
   gameView.highlightCell(event.cell);
-})
+});
 
 gameView.onMouseClick(event => {
   const cell = event.cell;
@@ -135,10 +135,10 @@ document.getElementById('playbutton').addEventListener('click', () => {
 document.getElementById('stopbutton').addEventListener('click', () => {
   gameClock.stop();
   state = 'stopped';
-})
+});
 
 document.getElementById('stepbutton').addEventListener('click', () => {
   gameClock.resume();
   run();
   gameClock.pause();
-})
+});

@@ -1,7 +1,7 @@
 export default class View{
   
   constructor(canvas){
-    if (!canvas || !canvas.nodeName || canvas.nodeName !== "CANVAS"){
+    if (!canvas || !canvas.nodeName || canvas.nodeName !== 'CANVAS'){
       throw new Error('View expects a CANVAS node as argument');
     }
     this._canvas = canvas;
@@ -23,7 +23,7 @@ export default class View{
     this._rowHeight = this._canvas.height / this._rows;
     this._colWidth = this._canvas.width / this._cols;
 
-    this._bufferCtx.fillStyle = "#FFFFFF";
+    this._bufferCtx.fillStyle = '#FFFFFF';
     this._bufferCtx.fillRect(0, 0, this._bufferCanvas.width, this._bufferCanvas.height);
 
     this.setState(initialState);
@@ -90,7 +90,7 @@ export default class View{
       callback({
         cell,
         coordinates: {x, y}
-      })
+      });
     });
   }
 
@@ -99,7 +99,7 @@ export default class View{
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;  
   
-    return {x, y}
+    return {x, y};
   }
   
   _mouseCoord2gridCoord(x, y){
