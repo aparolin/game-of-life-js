@@ -7,8 +7,6 @@ export default class View{
     this._canvas = canvas;
     this._ctx = this._canvas.getContext('2d');
 
-    this._lastHighlightedCell = null;
-
     this._bufferCanvas = document.createElement('canvas');
     this._bufferCanvas.width = this._canvas.width;
     this._bufferCanvas.height = this._canvas.height;
@@ -16,24 +14,22 @@ export default class View{
   }
 
   drawGrid(rows, cols, initialState){
-    if (initialState){
-      this._validateInitialState(rows, cols, initialState);
+    if (!initialState){
+      throw new Error('initialState is mandatory');
     }
+
+    this._validateInitialState(rows, cols, initialState);
 
     this._rows = rows;
     this._cols = cols;
     this._rowHeight = this._canvas.height / this._rows;
     this._colWidth = this._canvas.width / this._cols;
 
-    this._bufferCtx.fillStyle = '#FFFFFF';
+    this._bufferCtx.fillStyle = "#FFFFFF";
     this._bufferCtx.fillRect(0, 0, this._bufferCanvas.width, this._bufferCanvas.height);
-    this._drawRows();
-    this._drawCols();
 
-    if (initialState){
-      this.setState(initialState);
-      this.saveState();
-    }
+    this.setState(initialState);
+    this.saveState();
 
     this.redraw();
   }
@@ -51,9 +47,11 @@ export default class View{
   setState(stateMatrix){
     for (let row = 0; row < stateMatrix.length; row++){
       for (let col = 0; col < stateMatrix[0].length; col++){
-        if (stateMatrix[row][col] === 1){
-          this.setCell({row, col}, true);
+        let enabled = true;
+        if (stateMatrix[row][col] !== 1){
+          enabled = false;
         }
+        this.setCellSelected({row, col}, enabled);
       }
     }
   }
@@ -66,38 +64,10 @@ export default class View{
     this._ctx.drawImage(this._bufferCanvas, 0, 0);
   }
   
-  _drawRows(color = '#777777'){
-    this._bufferCtx.strokeStyle = color;
-    
-    for (let row = 0; row < this._rows; row++){
-      let start = {x: 0, y: row * this._rowHeight};
-      let end = {x: this._canvas.width, y : row * this._rowHeight};
-
-      this._drawLine(this._bufferCtx, start, end);
-    }
-    this._drawLine(this._bufferCtx, {x: 0, y: this._canvas.height}, {x: this._canvas.width, y: this._canvas.height});
-  }
-  
-  _drawCols(color = '#777777'){
-    this._bufferCtx.strokeStyle = color;
-
-    for (let col = 0; col < this._cols; col++){
-      let start = {x: col * this._colWidth, y: 0};
-      let end = {x: col * this._colWidth, y: this._canvas.height}
-      this._drawLine(this._bufferCtx, start, end);
-    }
-    this._drawLine(this._bufferCtx, {x: this._canvas.width, y: 0}, {x:this._canvas.width, y: this._canvas.height});
-  }
-  
-  _drawLine(ctx, start, end){
-    ctx.moveTo(start.x, start.y);
-    ctx.lineTo(end.x, end.y);
-    ctx.stroke();
-  }
-
-  setCell(cell, state){
+  setCellSelected(cell, state){
     const color = state ? '#25477c' : '#FFFFFF';
     this._fillCell(cell, color);
+    this.saveState();
   }
 
   highlightCell(cell, color='#5c88ce'){
@@ -113,10 +83,21 @@ export default class View{
 
     this._ctx.fillStyle = color;
     this._ctx.fillRect(startX, startY, this._colWidth, this._rowHeight);
+
+    this._ctx.rect(startX, startY, this._colWidth, this._rowHeight);
+    this._ctx.stroke();
   }
 
   onMouseMove(callback){
-    this._canvas.addEventListener('mousemove', event => {
+    this._prepareEventHandling('mousemove', callback);
+  }
+
+  onMouseClick(callback){
+    this._prepareEventHandling('click', callback);
+  }
+
+  _prepareEventHandling(eventName, callback){
+    this._canvas.addEventListener(eventName, event => {
       const {x, y} = this._getRealMouseCoordinate(event);
       const cell = this._mouseCoord2gridCoord(x, y);
 
@@ -124,7 +105,7 @@ export default class View{
         cell,
         coordinates: {x, y}
       })
-    })
+    });
   }
 
   _getRealMouseCoordinate(event){
