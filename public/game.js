@@ -1,5 +1,6 @@
-import View from './View.js';
+import Grid from './Grid.js';
 import Clock from './Clock.js';
+import {copyMatrix} from './utils.js';
 
 function createInitialState(rows, cols){
   let state = new Array(rows);
@@ -7,11 +8,6 @@ function createInitialState(rows, cols){
     state[row] = new Array(cols).fill(0);
   }
   return state;
-}
-
-function copyMatrix(matrix){
-  const matrixAsString = matrix.map(row => row.join(',')).join('|');
-  return matrixAsString.split('|').map(row => row.split(',').map(item => parseInt(item)));
 }
 
 function checkNeighboorhood(cell){
@@ -77,7 +73,7 @@ function run(){
   }
 
   gameState = newGameState;
-  gameView.setState(gameState);
+  gameGrid.setState(gameState);
 
   if (state === 'playing'){
     requestAnimationFrame(run);
@@ -86,7 +82,7 @@ function run(){
 
 let state = 'stopped';
 const canvas = document.getElementById('canvas');
-const gameView = new View(canvas);
+const gameGrid = new Grid(canvas);
 
 let gameState = [
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -106,13 +102,13 @@ let gameState = [
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 ];
 // let gameState = createInitialState(50,50);
-gameView.drawGrid(gameState);
+gameGrid.draw(gameState);
 
-gameView.onMouseMove(event => {
-  gameView.highlightCell(event.cell);
+gameGrid.onMouseMove(event => {
+  gameGrid.highlightCell(event.cell);
 });
 
-gameView.onMouseClick(event => {
+gameGrid.onMouseClick(event => {
   const cell = event.cell;
 
   let selected = true;
@@ -122,7 +118,7 @@ gameView.onMouseClick(event => {
   } else {
     gameState[cell.row][cell.col] = 1;
   }
-  gameView.setCellSelected(event.cell, selected);
+  gameGrid.setCellSelected(event.cell, selected);
 });
 
 //buttons handling

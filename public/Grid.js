@@ -1,4 +1,4 @@
-export default class View{
+export default class Grid{
   
   constructor(canvas){
     if (!canvas || !canvas.nodeName || canvas.nodeName !== 'CANVAS'){
@@ -13,7 +13,7 @@ export default class View{
     this._bufferCtx = this._bufferCanvas.getContext('2d');
   }
 
-  drawGrid(initialState){
+  draw(initialState){
     if (!initialState){
       throw new Error('initialState is mandatory');
     }
