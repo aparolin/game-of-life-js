@@ -109,7 +109,7 @@ const gameGrid = new Grid(canvas);
 //   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 // ];
 let gameState = createGameState(30,30);
-gameGrid.draw(gameState);
+gameGrid.init(gameState);
 
 gameGrid.onMouseMove(event => {
   gameGrid.highlightCell(event.cell);
@@ -175,4 +175,12 @@ handleButtonClick('randombutton', () => {
     return Math.random() > 0.7 ? 1 : 0;
   });
   gameGrid.setState(gameState);
+});
+
+handleButtonClick('setupgridbutton', () => {
+  const rows = parseInt(document.getElementById('inputrows').value);
+  const cols = parseInt(document.getElementById('inputcols').value);
+
+  gameState = createGameState(rows, cols);
+  gameGrid.init(gameState);
 });

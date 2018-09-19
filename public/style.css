@@ -21,12 +21,28 @@ canvas {
   font-size: 24px;
 }
 
-button{
-  width: 150px;
-  height: 30px;
+.grid-settings{
+  width: 800px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  font-size: 24px;
 }
 
-button:hover { 
+.grid-settings > * {
+  margin-right: 15px;
+}
+
+input, button {
+  height: 30px;
+  width: 150px;
+}
+
+input[type=number]{
+  font-size: 24px;
+} 
+
+input[type=button]:hover, button:hover { 
   background-color: #5c88ce;
   border-color: #25477c;
 }

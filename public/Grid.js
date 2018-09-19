@@ -13,7 +13,7 @@ export default class Grid{
     this._bufferCtx = this._bufferCanvas.getContext('2d');
   }
 
-  draw(initialState){
+  init(initialState){
     if (!initialState){
       throw new Error('initialState is mandatory');
     }
@@ -30,6 +30,12 @@ export default class Grid{
     this.saveState();
 
     this.redraw();
+    this._updateGridSettingsBar();
+  }
+
+  _updateGridSettingsBar(){
+    document.getElementById('inputrows').setAttribute('value', this._rows);
+    document.getElementById('inputcols').setAttribute('value', this._cols);
   }
 
   setState(stateMatrix){
