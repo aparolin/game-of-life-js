@@ -33,6 +33,8 @@ export default class Grid{
   }
 
   setState(stateMatrix){
+    this._ctx.beginPath();
+    
     for (let row = 0; row < stateMatrix.length; row++){
       for (let col = 0; col < stateMatrix[0].length; col++){
         let enabled = true;

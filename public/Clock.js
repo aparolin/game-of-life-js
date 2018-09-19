@@ -2,6 +2,8 @@ export default class Clock {
   constructor() {
     this._clock = document.getElementById('clock');
     this._state = 'stopped';
+
+    this._requestId = null;
   }
 
   start() {
@@ -12,16 +14,25 @@ export default class Clock {
 
   _update() {
     const msElapsed = new Date() - this._gameStartedAt;
-    this._clock.textContent = msElapsed + 'ms';
-    this._clock.style.fontWeight = 'bold';
+    this._setClockText(msElapsed);
 
     if (this._state === 'running') {
-      requestAnimationFrame(this._update.bind(this));
+      this._requestId = requestAnimationFrame(this._update.bind(this));
     }
   }
 
+  _setClockText(text){
+    this._clock.textContent = text + 'ms';
+    this._clock.style.fontWeight = 'bold';
+  }
+
   stop() {
+    cancelAnimationFrame(this._requestId);
     this._state = 'stopped';
+
+    //send this to the end of the eventloop queue to ensure the animation
+    //frame request really got cancelled
+    setTimeout(() => this._setClockText(0), 0);
   }
 
   pause() {
