@@ -96,7 +96,7 @@ export default class View{
   }
 
   _getRealMouseCoordinate(event){
-    const rect = canvas.getBoundingClientRect();
+    const rect = this._canvas.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;  
   
