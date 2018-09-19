@@ -2,6 +2,10 @@ body {
   display: grid;
 }
 
+canvas {
+  cursor: pointer;
+}
+
 .toolbar{
   width: 800px;
   display: flex;
@@ -20,4 +24,9 @@ body {
 button{
   width: 150px;
   height: 30px;
+}
+
+button:hover { 
+  background-color: #5c88ce;
+  border-color: #25477c;
 }
