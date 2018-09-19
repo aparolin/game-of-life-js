@@ -42,6 +42,7 @@ export default class View{
         this.setCellSelected({row, col}, enabled);
       }
     }
+    this._ctx.stroke();
   }
 
   saveState(){
@@ -61,6 +62,7 @@ export default class View{
   highlightCell(cell, color='#5c88ce'){
     this.redraw();
     this._fillCell(cell, color);
+    this._ctx.stroke();
   }
 
   _fillCell(cell, color){
@@ -71,7 +73,6 @@ export default class View{
     this._ctx.fillRect(startX, startY, this._colWidth, this._rowHeight);
 
     this._ctx.rect(startX, startY, this._colWidth, this._rowHeight);
-    this._ctx.stroke();
   }
 
   onMouseMove(callback){
