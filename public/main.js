@@ -6,7 +6,7 @@ function handleButtonClick(buttonId, callback) {
   });
 }
 
-let gameState = [
+let gameSetup = [
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -25,7 +25,7 @@ let gameState = [
 ];
 
 const game = new Game();
-game.startNew(gameState);
+game.startNew(gameSetup);
 
 handleButtonClick('playbutton', () => {
   game.playPause();
