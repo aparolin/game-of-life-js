@@ -1,13 +1,13 @@
 {
   "name": "game-of-life",
   "version": "1.0.0",
-  "description": "",
+  "description": "Just a very simple representation of Conway's Game of Life in JS",
   "main": "game.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node app.js"
   },
-  "author": "",
+  "author": "Alessandro Parolin",
   "license": "ISC",
   "dependencies": {
     "express": "^4.16.3"
