@@ -2,185 +2,159 @@ import Grid from './Grid.js';
 import Clock from './Clock.js';
 import { copyMatrix } from './utils.js';
 
-function createGameState(rows, cols, value = 0) {
-  let state = new Array(rows);
-  for (let row = 0; row < rows; row++) {
-    state[row] = new Array(cols);
-    for (let col = 0; col < cols; col++) {
-      if (typeof value === 'function'){
-        state[row][col] = value();
-      } else{
-        state[row][col] = value;
-      }
-    }
-  }
-  return state;
-}
+export default class Game {
+  constructor() {
+    this._state = 'stopped';
 
-function checkNeighboorhood(cell) {
-  let liveNeighbors = 0;
-  let deadNeighbors = 0;
-  const row = cell.row;
-  const col = cell.col;
+    this._clock = new Clock();
 
-  for (let rowOffset = -1; rowOffset <= 1; rowOffset++) {
-    //handle corner cases
-    if (row + rowOffset < 0 || row + rowOffset === gameState.length) {
-      continue;
-    }
+    const canvas = document.getElementById('canvas');
+    this._grid = new Grid(canvas);
+    this._gameState = null;
 
-    for (let colOffset = -1; colOffset <= 1; colOffset++) {
-      //handle corner cases
-      if (col + colOffset < 0 || col + colOffset === gameState[0].length) {
-        continue;
-      }
-
-      //do not check the cell itself, only its neighbors
-      if (rowOffset === 0 && colOffset === 0) {
-        continue;
-      }
-
-      //check neighbor
-      if (gameState[row + rowOffset][col + colOffset] === 1) {
-        liveNeighbors++;
+    this._grid.onMouseMove(event => {
+      this._grid.highlightCell(event.cell);
+    });
+    
+    this._grid.onMouseClick(event => {
+      const cell = event.cell;
+    
+      let selected = true;
+      if (this._gameState[cell.row][cell.col] === 1) {
+        this._gameState[cell.row][cell.col] = 0;
+        selected = false;
       } else {
-        deadNeighbors++;
+        this._gameState[cell.row][cell.col] = 1;
       }
+      this._grid.setCellSelected(event.cell, selected);
+    });
+  }
+
+  startNew(initialSetup){
+    if (Array.isArray(initialSetup)){
+      this._gameState = initialSetup;
+    } else if (typeof(initialSetup) === 'object'){
+      this._gameState = this._createGameState(initialSetup.rows, initialSetup.cols, initialSetup.value);
+    } else {
+      throw new Error('Type of initialSetup should be a 2D matrix, or an object containing rows and cols');
+    }
+
+    this._grid.init(this._gameState);
+  }
+
+  _createGameState(rows, cols, value = 0) {
+    let state = new Array(rows);
+    for (let row = 0; row < rows; row++) {
+      state[row] = new Array(cols);
+      for (let col = 0; col < cols; col++) {
+        if (typeof value === 'function'){
+          state[row][col] = value();
+        } else{
+          state[row][col] = value;
+        }
+      }
+    }
+    return state;
+  }
+
+  _run() {
+    const rows = this._gameState.length;
+    const cols = this._gameState[0].length;
+  
+    const newGameState = copyMatrix(this._gameState);
+  
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        let curCel = this._gameState[row][col];
+        const neighborhood = this._checkNeighboorhood({ row, col });
+  
+        //apply rules
+        if (curCel === 1 && neighborhood.live < 2) {
+          newGameState[row][col] = 0;
+        }
+        if (curCel === 1 && neighborhood.live > 3) {
+          newGameState[row][col] = 0;
+        }
+        if (curCel === 0 && neighborhood.live === 3) {
+          newGameState[row][col] = 1;
+        }
+      }
+    }
+  
+    this._gameState = newGameState;
+    this._grid.setState(this._gameState);
+  
+    if (this._state === 'playing') {
+      requestAnimationFrame(this._run.bind(this));
     }
   }
 
-  return {
-    live: liveNeighbors,
-    dead: deadNeighbors
-  };
-}
-
-function run() {
-  const rows = gameState.length;
-  const cols = gameState[0].length;
-
-  const newGameState = copyMatrix(gameState);
-
-  for (let row = 0; row < rows; row++) {
-    for (let col = 0; col < cols; col++) {
-      let curCel = gameState[row][col];
-      const neighborhood = checkNeighboorhood({ row, col });
-
-      //apply rules
-      if (curCel === 1 && neighborhood.live < 2) {
-        newGameState[row][col] = 0;
+  _checkNeighboorhood(cell) {
+    let liveNeighbors = 0;
+    let deadNeighbors = 0;
+    const row = cell.row;
+    const col = cell.col;
+  
+    for (let rowOffset = -1; rowOffset <= 1; rowOffset++) {
+      //handle corner cases
+      if (row + rowOffset < 0 || row + rowOffset === this._gameState.length) {
+        continue;
       }
-      if (curCel === 1 && neighborhood.live > 3) {
-        newGameState[row][col] = 0;
+  
+      for (let colOffset = -1; colOffset <= 1; colOffset++) {
+        //handle corner cases
+        if (col + colOffset < 0 || col + colOffset === this._gameState[0].length) {
+          continue;
+        }
+  
+        //do not check the cell itself, only its neighbors
+        if (rowOffset === 0 && colOffset === 0) {
+          continue;
+        }
+  
+        //check neighbor
+        if (this._gameState[row + rowOffset][col + colOffset] === 1) {
+          liveNeighbors++;
+        } else {
+          deadNeighbors++;
+        }
       }
-      if (curCel === 0 && neighborhood.live === 3) {
-        newGameState[row][col] = 1;
-      }
+    }
+  
+    return {
+      live: liveNeighbors,
+      dead: deadNeighbors
+    };
+  }
+
+  playPause(){
+    if (this._state === 'playing') {
+      this._clock.pause();
+      this._state = 'paused';
+    } else {
+      this._state = 'playing';
+      this._clock.resume();
+      this._run();
     }
   }
 
-  gameState = newGameState;
-  gameGrid.setState(gameState);
-
-  if (state === 'playing') {
-    requestAnimationFrame(run);
+  stop(){
+    this._clock.stop();
+    this._state = 'stopped';
   }
-}
 
-let state = 'stopped';
-const canvas = document.getElementById('canvas');
-const gameGrid = new Grid(canvas);
-
-// let gameState = [
-//   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-//   [0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0],
-//   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-//   [0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0],
-//   [0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0],
-//   [0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0],
-//   [0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0],
-//   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-//   [0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0],
-//   [0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0],
-//   [0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0],
-//   [0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0],
-//   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-//   [0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0],
-//   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-// ];
-let gameState = createGameState(30,30);
-gameGrid.init(gameState);
-
-gameGrid.onMouseMove(event => {
-  gameGrid.highlightCell(event.cell);
-});
-
-gameGrid.onMouseClick(event => {
-  const cell = event.cell;
-
-  let selected = true;
-  if (gameState[cell.row][cell.col] === 1) {
-    gameState[cell.row][cell.col] = 0;
-    selected = false;
-  } else {
-    gameState[cell.row][cell.col] = 1;
+  runSingleStep(){
+    this._clock.resume();
+    this._run();
+    this._clock.pause();
   }
-  gameGrid.setCellSelected(event.cell, selected);
-});
 
-//buttons handling
-function handleButtonClick(buttonId, callback) {
-  document.getElementById(buttonId).addEventListener('click', event => {
-    callback(event);
-  });
-}
-
-const gameClock = new Clock();
-handleButtonClick('playbutton', () => {
-  if (state === 'playing') {
-    gameClock.pause();
-    state = 'paused';
-  } else {
-    state = 'playing';
-    gameClock.resume();
-    run();
-  }
-});
-
-handleButtonClick('stopbutton', () => {
-  gameClock.stop();
-  state = 'stopped';
-});
-
-handleButtonClick('stepbutton', () => {
-  gameClock.resume();
-  run();
-  gameClock.pause();
-});
-
-handleButtonClick('clearbutton', () => {
-  for (let row = 0; row < gameState.length; row++) {
-    for (let col = 0; col < gameState[0].length; col++) {
-      gameState[row][col] = 0;
+  clear(){
+    for (let row = 0; row < this._gameState.length; row++) {
+      for (let col = 0; col < this._gameState[0].length; col++) {
+        this._gameState[row][col] = 0;
+      }
     }
+    this._grid.setState(this._gameState);
   }
-  gameGrid.setState(gameState);
-});
-
-handleButtonClick('randombutton', () => {
-  const rows = gameState.length;
-  const cols = gameState[0].length;
-
-  gameState = createGameState(rows, cols, function(){
-    return Math.random() > 0.7 ? 1 : 0;
-  });
-  gameGrid.setState(gameState);
-});
-
-handleButtonClick('setupgridbutton', () => {
-  const rows = parseInt(document.getElementById('inputrows').value);
-  const cols = parseInt(document.getElementById('inputcols').value);
-
-  gameState = createGameState(rows, cols);
-  gameGrid.init(gameState);
-});
+}
