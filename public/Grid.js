@@ -47,10 +47,12 @@ export default class Grid{
         if (stateMatrix[row][col] !== 1){
           enabled = false;
         }
-        this.setCellSelected({row, col}, enabled);
+        this.setCellSelected({row, col}, enabled, true);
       }
     }
+    
     this._ctx.stroke();
+    this.saveState();
   }
 
   saveState(){
@@ -61,10 +63,15 @@ export default class Grid{
     this._ctx.drawImage(this._bufferCanvas, 0, 0);
   }
   
-  setCellSelected(cell, state){
+  setCellSelected(cell, state, batch=false){
     const color = state ? '#25477c' : '#FFFFFF';
     this._fillCell(cell, color);
-    this.saveState();
+
+    //if several cells are being set at once, we can choose to save only once
+    //after the whole processing is done, for performance reasons
+    if (!batch){
+      this.saveState();
+    }
   }
 
   highlightCell(cell, color='#5c88ce'){
